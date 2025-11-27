@@ -1,0 +1,35 @@
+version: "3"
+services:
+  #PHP Service
+  app-api:
+    container_name: app-api
+    build:
+      context: .docker/php
+      dockerfile: Dockerfile
+    image: "app/php-apache"
+    ports:
+      - 8080:80
+    volumes:
+      - ./backend/:/var/www/html
+    networks:
+      - app-network
+
+  # SPA App
+  app-front:
+    container_name: app-front
+    image: "app/vue"
+    build:
+      context: .
+      dockerfile: .docker/vue/Dockerfile
+    volumes:
+      - "./frontend/:/app"
+      - "/app/node_modules"
+    ports:
+      - "8070:8070"
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
