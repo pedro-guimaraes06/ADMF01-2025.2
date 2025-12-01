@@ -13,9 +13,9 @@ return [
     */
 
     'pesos_criterios' => [
-        'epidemiologia' => 0.45,      // 45% - Maior peso (contexto local)
-        'gravidade' => 0.35,          // 35% - Sinais clínicos graves
-        'sintomas' => 0.15,           // 15% - Sintomas gerais
+        'gravidade' => 0.50,          // 50% - Sinais clínicos graves (prioridade máxima)
+        'sintomas' => 0.30,           // 30% - Sintomas gerais
+        'epidemiologia' => 0.15,      // 15% - Contexto local
         'sociodemografico' => 0.05,   // 5%  - Fatores demográficos
     ],
 

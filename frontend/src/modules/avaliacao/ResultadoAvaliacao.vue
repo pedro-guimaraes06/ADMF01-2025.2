@@ -47,7 +47,7 @@
                     >
                       <div class="score-content">
                         <div class="score-value">{{ scoreFormatado }}</div>
-                        <div class="score-label">Score AHP</div>
+                        <div class="score-label">Score</div>
                       </div>
                     </v-progress-circular>
                   </div>
@@ -73,19 +73,19 @@
                   <div class="info-grid">
                     <div class="info-item">
                       <v-icon left color="primary">mdi-account</v-icon>
-                      <span><strong>Paciente:</strong> {{ avaliacao.idade }} anos, {{ sexoTexto }}</span>
+                      <span><strong>Paciente:</strong> {{ avaliacao?.idade ?? '-' }} anos, {{ sexoTexto }}</span>
                     </div>
                     <div class="info-item">
                       <v-icon left color="primary">mdi-map-marker</v-icon>
-                      <span><strong>Local:</strong> {{ avaliacao.municipio }}/{{ avaliacao.uf }}</span>
+                      <span><strong>Local:</strong> {{ avaliacao?.municipio ?? '-' }}/{{ avaliacao?.uf ?? '-' }}</span>
                     </div>
                     <div class="info-item">
                       <v-icon left color="primary">mdi-calendar</v-icon>
-                      <span><strong>Data:</strong> {{ dataFormatada }}</span>
+                      <span><strong>Data:</strong> {{ dataFormatada || '-' }}</span>
                     </div>
                     <div class="info-item">
                       <v-icon left color="primary">mdi-calendar-week</v-icon>
-                      <span><strong>Semana Epi:</strong> {{ avaliacao.semana_epidemiologica }}</span>
+                      <span><strong>Semana Epi:</strong> {{ avaliacao?.semana_epidemiologica ?? '-' }}</span>
                     </div>
                   </div>
                 </v-col>
@@ -101,7 +101,7 @@
           <v-card class="h-100 card-animated" elevation="4">
             <v-card-title class="primary white--text">
               <v-icon left color="white">mdi-chart-donut</v-icon>
-              Análise por Critérios AHP
+              Análise por Critérios
             </v-card-title>
             <v-card-text class="pt-6">
               <apexchart
@@ -170,7 +170,7 @@
               <v-divider class="my-4"></v-divider>
 
               <div class="detalhes-clinicos">
-                <div class="detalhe-item" v-if="avaliacao.scores.epidemiologia !== undefined">
+                <div class="detalhe-item" v-if="avaliacao?.scores?.epidemiologia !== undefined">
                   <v-icon color="blue" left>mdi-chart-line-variant</v-icon>
                   <div>
                     <strong>Contexto Epidemiológico:</strong>
@@ -180,7 +180,7 @@
                   </div>
                 </div>
 
-                <div class="detalhe-item" v-if="avaliacao.scores.gravidade !== undefined">
+                <div class="detalhe-item" v-if="avaliacao?.scores?.gravidade !== undefined">
                   <v-icon color="red" left>mdi-alert-octagon</v-icon>
                   <div>
                     <strong>Sinais Clínicos:</strong>
@@ -190,7 +190,7 @@
                   </div>
                 </div>
 
-                <div class="detalhe-item" v-if="avaliacao.scores.sintomas !== undefined">
+                <div class="detalhe-item" v-if="avaliacao?.scores?.sintomas !== undefined">
                   <v-icon color="orange" left>mdi-thermometer-alert</v-icon>
                   <div>
                     <strong>Sintomatologia:</strong>
@@ -200,7 +200,7 @@
                   </div>
                 </div>
 
-                <div class="detalhe-item" v-if="avaliacao.scores.sociodemografico !== undefined">
+                <div class="detalhe-item" v-if="avaliacao?.scores?.sociodemografico !== undefined">
                   <v-icon color="purple" left>mdi-account-group</v-icon>
                   <div>
                     <strong>Perfil Sociodemográfico:</strong>
@@ -218,7 +218,7 @@
           <v-card class="card-animated" elevation="4">
             <v-card-title class="success white--text">
               <v-icon left color="white">mdi-clipboard-check</v-icon>
-              Recomendações do SAD
+              Próximos passos
             </v-card-title>
             <v-card-text class="pt-4">
               <v-timeline dense>
@@ -253,7 +253,7 @@
           <v-card class="card-animated" elevation="4">
             <v-card-title class="indigo white--text">
               <v-icon left color="white">mdi-chart-bar</v-icon>
-              Comparação dos Scores AHP
+              Comparação dos Scores
             </v-card-title>
             <v-card-text class="pt-6">
               <apexchart
@@ -383,7 +383,10 @@ export default {
     },
 
     dataFormatada() {
-      return moment(this.avaliacao?.created_at).format('DD/MM/YYYY HH:mm')
+      if (!this.avaliacao?.created_at) {
+        return moment().format('DD/MM/YYYY HH:mm')
+      }
+      return moment(this.avaliacao.created_at).format('DD/MM/YYYY HH:mm')
     },
 
     criteriosDetalhados() {
@@ -393,21 +396,21 @@ export default {
         {
           nome: 'Epidemiologia',
           score: this.avaliacao.scores.epidemiologia || 0,
-          peso: 0.45,
+          peso: 0.15,
           cor: 'blue',
           icone: 'mdi-chart-line-variant'
         },
         {
           nome: 'Gravidade',
           score: this.avaliacao.scores.gravidade || 0,
-          peso: 0.35,
+          peso: 0.50,
           cor: 'red',
           icone: 'mdi-alert-octagon'
         },
         {
           nome: 'Sintomas',
           score: this.avaliacao.scores.sintomas || 0,
-          peso: 0.15,
+          peso: 0.30,
           cor: 'orange',
           icone: 'mdi-thermometer-alert'
         },
@@ -423,7 +426,7 @@ export default {
 
     radarSeries() {
       return [{
-        name: 'Score AHP',
+        name: 'Score',
         data: [
           (this.avaliacao?.scores?.epidemiologia || 0) * 100,
           (this.avaliacao?.scores?.gravidade || 0) * 100,
@@ -521,7 +524,7 @@ export default {
           }
         },
         xaxis: {
-          categories: ['Epidemiologia (45%)', 'Gravidade (35%)', 'Sintomas (15%)', 'Sociodemográfico (5%)'],
+          categories: ['Epidemiologia (15%)', 'Gravidade (50%)', 'Sintomas (30%)', 'Sociodemográfico (5%)'],
           max: 100
         },
         yaxis: {
@@ -553,11 +556,11 @@ export default {
         },
         'Médio': {
           titulo: 'Atenção - Monitoramento requerido',
-          descricao: 'A avaliação AHP identifica fatores que elevam moderadamente o risco. O paciente necessita de acompanhamento mais rigoroso. Considere consultas de retorno programadas e orientação detalhada sobre sinais de alarme que demandam atenção médica imediata.'
+          descricao: 'A avaliação identifica fatores que elevam moderadamente o risco. O paciente necessita de acompanhamento mais rigoroso. Considere consultas de retorno programadas e orientação detalhada sobre sinais de alarme que demandam atenção médica imediata.'
         },
         'Alto': {
           titulo: 'ALERTA - Risco elevado de complicações',
-          descricao: 'ATENÇÃO: O método AHP detectou múltiplos fatores de risco significativos. Este paciente requer avaliação médica presencial URGENTE. Considere internação hospitalar para monitoramento contínuo, hidratação venosa e exames laboratoriais seriados.'
+          descricao: 'ATENÇÃO: O método detectou múltiplos fatores de risco significativos. Este paciente requer avaliação médica presencial URGENTE. Considere internação hospitalar para monitoramento contínuo, hidratação venosa e exames laboratoriais seriados.'
         }
       }
 
@@ -741,7 +744,7 @@ export default {
       try {
         const id = this.$route.params.id
         const resultado = await this.buscarAvaliacao(id)
-        this.avaliacao = resultado
+        this.avaliacao = resultado.avaliacao || resultado
       } catch (error) {
         console.error('Erro ao carregar avaliação:', error)
         this.erro = 'Não foi possível carregar os dados da avaliação.'

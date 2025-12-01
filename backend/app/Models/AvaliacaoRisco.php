@@ -29,15 +29,69 @@ class AvaliacaoRisco extends Model
      *
      * @var string
      */
-    protected $table = 'avaliacoes_risco';
+    protected $table = 'dengue_2025';
+
+    /**
+     * Desabilita timestamps automáticos (created_at, updated_at)
+     * pois a tabela dengue_2025 não possui essas colunas
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Atributos que podem ser atribuídos em massa
+     * Mapeando para as colunas existentes na tabela dengue_2025
      *
      * @var array
      */
     protected $fillable = [
-        'input_json',
+        // Campos que já existem na tabela dengue_2025
+        'FEBRE',
+        'MIALGIA',
+        'CEFALEIA',
+        'EXANTEMA',
+        'VOMITO',
+        'NAUSEA',
+        'DOR_COSTAS',
+        'CONJUNTVIT',
+        'ARTRALGIA',
+        'DOR_RETRO',
+        'PETEQUIA_N',
+        'LEUCOPENIA',
+        'LACO',
+        'ALRM_HIPOT',
+        'ALRM_PLAQ',
+        'ALRM_VOM',
+        'ALRM_SANG',
+        'ALRM_HEMAT',
+        'ALRM_ABDOM',
+        'ALRM_LETAR',
+        'ALRM_HEPAT',
+        'ALRM_LIQ',
+        'GRAV_PULSO',
+        'GRAV_CONV',
+        'GRAV_ENCH',
+        'GRAV_EXTRE',
+        'GRAV_HIPOT',
+        'GRAV_HEMAT',
+        'GRAV_MELEN',
+        'GRAV_METRO',
+        'GRAV_SANG',
+        'GRAV_AST',
+        'GRAV_MIOC',
+        'GRAV_CONSC',
+        'GRAV_ORGAO',
+        'CS_SEXO',
+        'SG_UF',
+        'ID_MN_RESI',
+        'NU_IDADE_N',
+        'SEM_NOT',
+        'TENDENCIA_TEMPORAL',
+        'SINTOMAS_TOTAL',
+        'ALARMES_TOTAIS',
+        'GRAVIDADE_TOTAL',
+        // Campos de cálculo de risco
         'score_epidemiologia',
         'score_gravidade',
         'score_sintomas',
@@ -45,6 +99,7 @@ class AvaliacaoRisco extends Model
         'score_final',
         'nivel_risco',
         'justificativa',
+        'input_json',
     ];
 
     /**

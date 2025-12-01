@@ -73,17 +73,6 @@
                     prepend-icon="mdi-city"
                   ></v-text-field>
                 </v-col>
-
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="form.codigo_municipio"
-                    label="Código IBGE"
-                    outlined
-                    dense
-                    prepend-icon="mdi-numeric"
-                    maxlength="7"
-                  ></v-text-field>
-                </v-col>
               </v-row>
 
               <v-btn color="primary" @click="step = 2">
@@ -100,33 +89,33 @@
             <v-stepper-content step="2">
               <v-alert type="info" dense outlined class="mb-4">
                 <v-icon left>mdi-information</v-icon>
-                Estas informações são essenciais para o cálculo do risco epidemiológico (peso: 45%)
+                Estas informações são essenciais para o cálculo do risco epidemiológico (peso: 15%)
               </v-alert>
 
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model.number="form.casos_municipio"
+                    v-model="casosMunicipioFormatted"
                     label="Casos no Município *"
-                    type="number"
-                    :rules="[rules.required, rules.nonNegative]"
+                    :rules="[rules.requiredNumber(form.casos_municipio), rules.nonNegativeNumber(form.casos_municipio)]"
                     outlined
                     dense
                     prepend-icon="mdi-account-multiple"
                     hint="Total de casos confirmados no município"
+                    @input="formatarCasosMunicipio"
                   ></v-text-field>
                 </v-col>
 
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model.number="form.populacao_municipio"
+                    v-model="populacaoMunicipioFormatted"
                     label="População do Município *"
-                    type="number"
-                    :rules="[rules.required, rules.positive]"
+                    :rules="[rules.requiredNumber(form.populacao_municipio), rules.positiveNumber(form.populacao_municipio)]"
                     outlined
                     dense
                     prepend-icon="mdi-account-group"
                     hint="População total estimada"
+                    @input="formatarPopulacaoMunicipio"
                   ></v-text-field>
                 </v-col>
 
@@ -182,7 +171,7 @@
             <v-stepper-content step="3">
               <v-alert type="warning" dense outlined class="mb-4">
                 <v-icon left>mdi-alert</v-icon>
-                Selecione todos os sintomas presentes no paciente (peso: 15%)
+                Selecione todos os sintomas presentes no paciente (peso: 30%)
               </v-alert>
 
               <!-- Sintomas Clássicos -->
@@ -254,7 +243,7 @@
               <v-card outlined color="orange lighten-5">
                 <v-card-subtitle class="font-weight-bold error--text">
                   <v-icon left color="error">mdi-alert-octagon</v-icon>
-                  Sinais que indicam gravidade potencial (peso: 60% do critério Gravidade)
+                  Sinais que indicam gravidade potencial (peso: 60% do critério Gravidade = 30% do total)
                 </v-card-subtitle>
                 <v-card-text>
                   <v-row dense>
@@ -303,7 +292,7 @@
               <v-card outlined color="red lighten-5">
                 <v-card-subtitle class="font-weight-bold error--text">
                   <v-icon left color="error">mdi-alert-octagram-outline</v-icon>
-                  Sinais de dengue grave - Requer atenção médica imediata (peso: 40% do critério Gravidade)
+                  Sinais de dengue grave - Requer atenção médica imediata (peso: 40% do critério Gravidade = 20% do total)
                 </v-card-subtitle>
                 <v-card-text>
                   <v-row dense>
@@ -419,13 +408,16 @@ export default {
       snackbarMessage: '',
       snackbarColor: 'success',
 
+      // Campos formatados para exibição
+      casosMunicipioFormatted: '',
+      populacaoMunicipioFormatted: '',
+
       form: {
         // Dados do paciente
         idade: null,
         sexo: '',
         uf: '',
         municipio: '',
-        codigo_municipio: '',
 
         // Dados epidemiológicos
         casos_municipio: null,
@@ -481,9 +473,12 @@ export default {
       // Regras de validação
       rules: {
         required: v => !!v || 'Campo obrigatório',
+        requiredNumber: num => () => (num !== null && num !== undefined) || 'Campo obrigatório',
         idade: v => (v >= 0 && v <= 120) || 'Idade deve estar entre 0 e 120',
         nonNegative: v => v >= 0 || 'Valor não pode ser negativo',
-        positive: v => v > 0 || 'Valor deve ser maior que zero'
+        nonNegativeNumber: num => () => (num !== null && num >= 0) || 'Valor não pode ser negativo',
+        positive: v => v > 0 || 'Valor deve ser maior que zero',
+        positiveNumber: num => () => (num !== null && num > 0) || 'Valor deve ser maior que zero'
       },
 
       // Opções para selects
@@ -582,6 +577,28 @@ export default {
   methods: {
     ...mapActions('risco', ['avaliarRisco']),
 
+    formatarCasosMunicipio(value) {
+      // Remove tudo que não é número
+      const numeros = String(value || '').replace(/\D/g, '')
+      
+      // Converte para número e armazena no form
+      this.form.casos_municipio = numeros ? parseInt(numeros) : null
+      
+      // Formata com pontos de milhar
+      this.casosMunicipioFormatted = numeros ? parseInt(numeros).toLocaleString('pt-BR') : ''
+    },
+
+    formatarPopulacaoMunicipio(value) {
+      // Remove tudo que não é número
+      const numeros = String(value || '').replace(/\D/g, '')
+      
+      // Converte para número e armazena no form
+      this.form.populacao_municipio = numeros ? parseInt(numeros) : null
+      
+      // Formata com pontos de milhar
+      this.populacaoMunicipioFormatted = numeros ? parseInt(numeros).toLocaleString('pt-BR') : ''
+    },
+
     async calcularRisco() {
       if (!this.$refs.form.validate()) {
         this.mostrarMensagem('Por favor, preencha todos os campos obrigatórios', 'error')
@@ -594,12 +611,15 @@ export default {
         const resultado = await this.avaliarRisco(this.form)
 
         this.mostrarMensagem('Avaliação realizada com sucesso!', 'success')
-        
-        // Redirecionar para página de resultado
-        this.$router.push({
-          name: 'Resultado',
-          params: { id: resultado.avaliacao_id }
-        })
+
+        // Redirecionar para tela de resultado usando o id retornado
+        if (resultado && resultado.avaliacao_id) {
+          this.$router.push({ name: 'Resultado', params: { id: resultado.avaliacao_id } })
+        } else {
+          console.error('Estrutura de resposta inesperada:', resultado)
+          this.mostrarMensagem('Avaliação concluída, mas houve um problema ao exibir o resultado', 'warning')
+        }
+
       } catch (error) {
         console.error('Erro ao calcular risco:', error)
         this.mostrarMensagem(
@@ -620,6 +640,9 @@ export default {
           this.form[key] = null
         }
       })
+      // Limpar campos formatados
+      this.casosMunicipioFormatted = ''
+      this.populacaoMunicipioFormatted = ''
       this.step = 1
       this.mostrarMensagem('Formulário limpo', 'info')
     },
