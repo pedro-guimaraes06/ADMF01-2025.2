@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance as Middleware;
+use Closure;
 
-class PreventRequestsDuringMaintenance extends Middleware
+class PreventRequestsDuringMaintenance
 {
     /**
      * The URIs that should be reachable while maintenance mode is enabled.
@@ -14,4 +14,16 @@ class PreventRequestsDuringMaintenance extends Middleware
     protected $except = [
         //
     ];
+
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        return $next($request);
+    }
 }
