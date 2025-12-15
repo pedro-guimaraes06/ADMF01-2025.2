@@ -8,7 +8,7 @@
       </v-card-title>
 
       <v-card-subtitle class="primary white--text pb-3">
-        Sistema de Apoio à Decisão baseado em critérios clínicos e epidemiológicos
+        Sistema de Apoio à Decisão
       </v-card-subtitle>
 
       <v-divider></v-divider>
@@ -130,19 +130,6 @@
                     prepend-icon="mdi-calendar-week"
                     hint="Semana atual do ano (1-53)"
                   ></v-select>
-                </v-col>
-
-                <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model.number="form.tendencia_temporal"
-                    label="Tendência Temporal"
-                    type="number"
-                    step="0.01"
-                    outlined
-                    dense
-                    prepend-icon="mdi-chart-line"
-                    hint="Coeficiente de tendência (opcional)"
-                  ></v-text-field>
                 </v-col>
 
                 <!-- Cálculo automático de incidência -->
@@ -423,7 +410,6 @@ export default {
         casos_municipio: null,
         populacao_municipio: null,
         semana_epidemiologica: null,
-        tendencia_temporal: null,
 
         // Sintomas clássicos
         febre: false,

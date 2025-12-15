@@ -6,7 +6,15 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/avaliacao'
+    redirect: '/dashboard'
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/Dashboard.vue'),
+    meta: {
+      title: 'Dashboard Epidemiológico'
+    }
   },
   {
     path: '/avaliacao',
