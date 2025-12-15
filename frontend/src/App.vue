@@ -2,10 +2,10 @@
   <v-app>
     <!-- App Bar -->
     <v-app-bar app color="primary" dark elevation="4">
-      <v-toolbar-title class="d-flex align-center" style="margin-right: 30px;">
+      <v-toolbar-title class="d-flex align-center flex-shrink-0" style="margin-right: 50px; min-width: 150px;">
         <v-icon large class="mr-2">mdi-bug</v-icon>
         <div>
-          <div class="text-h6 font-weight-bold">Dengue</div>
+          <div class="text-h6 font-weight-bold">SAD Dengue</div>
         </div>
       </v-toolbar-title>
 

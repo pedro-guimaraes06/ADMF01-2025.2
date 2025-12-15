@@ -9,8 +9,8 @@
               <v-icon large color="primary" class="mr-2">mdi-view-dashboard</v-icon>
               Dashboard Epidemiológico
             </h1>
-            <p class="text-subtitle-1 grey--text mt-2">
-              Análise em tempo real dos casos de dengue - Ano 2025
+            <p class="text-subtitle-1 grey--text mt-2" style="margin-left: 50px;">
+              Análise dos casos de dengue
             </p>
           </div>
           <div>
@@ -477,7 +477,7 @@
             <v-card-text class="text-center">
               <v-icon left>mdi-information</v-icon>
               <span class="text-caption">
-                Dados atualizados em tempo real do Sistema de Apoio à Decisão - Dengue 2025
+                Dados do Sistema de Apoio à Decisão - Dengue 2025
               </span>
               <v-icon right>mdi-shield-check</v-icon>
             </v-card-text>
