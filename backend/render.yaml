@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: sad-dengue-api
+    env: php
+    region: oregon
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    envVars:
+      - key: APP_NAME
+        value: SAD Dengue API
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/data/sad_dengue.sqlite
+      - key: BROADCAST_DRIVER
+        value: log
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_LIFETIME
+        value: 120
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: TELESCOPE_ENABLED
+        value: false
+    disk:
+      name: sad-dengue-data
+      mountPath: /var/data
+      sizeGB: 1

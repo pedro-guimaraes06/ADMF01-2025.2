@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Api\RiscoController;
 use App\Http\Controllers\Api\SumarizacaoController;
 use App\Http\Controllers\Api\AnaliseController;
@@ -20,6 +21,25 @@ use App\Http\Controllers\Api\AnaliseController;
 Route::options('{any}', function () {
     return response()->json([], 200);
 })->where('any', '.*');
+
+// Health check para Render
+Route::get('/status', function () {
+    try {
+        // Verifica conexão com banco de dados
+        DB::connection()->getPdo();
+        $dbStatus = 'connected';
+    } catch (\Exception $e) {
+        $dbStatus = 'disconnected';
+    }
+    
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'SAD Dengue API',
+        'timestamp' => now()->toIso8601String(),
+        'database' => $dbStatus,
+        'environment' => app()->environment(),
+    ]);
+});
 
 // Teste de API
 Route::get('/test', function () {

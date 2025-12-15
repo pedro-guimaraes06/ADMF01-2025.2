@@ -1,0 +1,55 @@
+# 📋 Variáveis de Ambiente para Render
+# Copie e cole no painel de Environment Variables do Render
+
+# ============================================
+# INSTRUÇÕES
+# ============================================
+# 1. Gere APP_KEY localmente:
+#    cd backend && php artisan key:generate --show
+#
+# 2. Copie a chave gerada (base64:xxxx...)
+#
+# 3. Cole no painel do Render substituindo SUA_CHAVE_AQUI
+#
+# 4. Substitua seu-app pelo nome do seu app no Render
+# ============================================
+
+# Application
+APP_NAME=SAD Dengue API
+APP_ENV=production
+APP_KEY=base64:SUA_CHAVE_AQUI
+APP_DEBUG=false
+APP_URL=https://seu-app.onrender.com
+
+# Logging
+LOG_CHANNEL=stderr
+LOG_LEVEL=info
+
+# Database - SQLite
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/data/sad_dengue.sqlite
+
+# Cache, Queue, Session
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+# CORS - Permitir todas as origens (demo)
+# Para produção, especifique a URL do frontend:
+# CORS_ALLOWED_ORIGINS=https://seu-frontend.vercel.app
+CORS_ALLOWED_ORIGINS=*
+
+# Telescope - Desabilitado em produção
+TELESCOPE_ENABLED=false
+
+# ============================================
+# FORMATO PARA RENDER (Key-Value Pairs)
+# ============================================
+# No painel do Render, adicione cada linha como:
+# Key: APP_NAME
+# Value: SAD Dengue API
+#
+# Ou use o botão "Add from .env" e cole as linhas acima
+# ============================================
