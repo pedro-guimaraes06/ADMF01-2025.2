@@ -3,6 +3,7 @@
 namespace App\Services\Sumarizacao;
 
 use App\Models\Dengue2025;
+use App\Helpers\IBGEHelper;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -20,12 +21,21 @@ class SumarizacaoService
      */
     public function estatisticasGerais(): array
     {
+        // Calcular média de idade a partir de NU_IDADE_N (formato SINAN: 4XXX)
+        $mediaIdadeCodificada = Dengue2025::whereNotNull('NU_IDADE_N')
+            ->where('NU_IDADE_N', '>=', 4000)
+            ->where('NU_IDADE_N', '<', 5000)
+            ->avg('NU_IDADE_N');
+        
+        // Decodifica: subtrai 4000 para obter idade real
+        $mediaIdade = $mediaIdadeCodificada ? round($mediaIdadeCodificada - 4000, 1) : 0;
+        
         return [
             'total_casos' => Dengue2025::count(),
             'casos_confirmados' => Dengue2025::confirmados()->count(),
             'casos_graves' => Dengue2025::graves()->count(),
             'casos_com_alarme' => Dengue2025::comAlarme()->count(),
-            'media_idade' => round(Dengue2025::avg('IDADE'), 1),
+            'media_idade' => $mediaIdade,
             'distribuicao_sexo' => $this->distribuicaoSexo(),
         ];
     }
@@ -38,15 +48,24 @@ class SumarizacaoService
      */
     public function casosPorUF(?string $uf = null): array
     {
-        $query = Dengue2025::select('UF', DB::raw('COUNT(*) as total'))
-            ->groupBy('UF')
+        $query = Dengue2025::select('SG_UF', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('SG_UF')
+            ->groupBy('SG_UF')
             ->orderByDesc('total');
 
         if ($uf) {
-            $query->where('UF', $uf);
+            $query->where('SG_UF', $uf);
         }
 
-        return $query->get()->toArray();
+        $resultado = $query->get()->map(function($item) {
+            return [
+                'UF' => IBGEHelper::getSiglaUF($item->SG_UF),
+                'nome_uf' => IBGEHelper::getNomeUF($item->SG_UF),
+                'total' => $item->total
+            ];
+        })->toArray();
+
+        return $resultado;
     }
 
     /**
@@ -154,12 +173,45 @@ class SumarizacaoService
      */
     protected function distribuicaoSexo(): array
     {
-        return Dengue2025::select('SEXO', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('SEXO')
-            ->groupBy('SEXO')
-            ->get()
-            ->pluck('total', 'SEXO')
-            ->toArray();
+        $result = Dengue2025::select('CS_SEXO', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('CS_SEXO')
+            ->where('CS_SEXO', '!=', '')
+            ->where('CS_SEXO', '!=', 'CS_SEXO') // Ignorar linha de cabeçalho
+            ->groupBy('CS_SEXO')
+            ->get();
+        
+        // Mapear códigos para categorias
+        // Códigos reais na base dengue_2025:
+        // 0 = Feminino, 1 = Masculino, 9 = Ignorado
+        $mapeamento = [
+            'M' => 'M',
+            'F' => 'F',
+            'I' => 'I',
+            '0' => 'F',  // Feminino
+            '1' => 'M',  // Masculino
+            '9' => 'I',  // Ignorado
+            'Masculino' => 'M',
+            'Feminino' => 'F',
+            'Ignorado' => 'I',
+        ];
+        
+        $distribuicao = [];
+        
+        foreach ($result as $item) {
+            $codigo = $item->CS_SEXO;
+            $total = (int) $item->total;
+            
+            // Mapear o código para a categoria padrão
+            $categoria = $mapeamento[$codigo] ?? 'I'; // Se não encontrar, considerar Ignorado
+            
+            // Somar ao total da categoria
+            if (!isset($distribuicao[$categoria])) {
+                $distribuicao[$categoria] = 0;
+            }
+            $distribuicao[$categoria] += $total;
+        }
+        
+        return $distribuicao;
     }
 
     /**
@@ -187,13 +239,25 @@ class SumarizacaoService
      */
     public function topMunicipios(int $limite = 10): array
     {
-        return Dengue2025::select('MUNICIPIO', 'UF', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('MUNICIPIO')
-            ->groupBy('MUNICIPIO', 'UF')
+        $resultado = Dengue2025::select('ID_MN_RESI', 'SG_UF', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('ID_MN_RESI')
+            ->whereNotNull('SG_UF')
+            ->groupBy('ID_MN_RESI', 'SG_UF')
             ->orderByDesc('total')
             ->limit($limite)
             ->get()
+            ->map(function($item) {
+                return [
+                    'codigo_ibge' => str_replace('.0', '', $item->ID_MN_RESI),
+                    'municipio' => IBGEHelper::getNomeMunicipio($item->ID_MN_RESI),
+                    'uf' => IBGEHelper::getSiglaUF($item->SG_UF),
+                    'nome_uf' => IBGEHelper::getNomeUF($item->SG_UF),
+                    'total' => $item->total
+                ];
+            })
             ->toArray();
+
+        return $resultado;
     }
 
     /**

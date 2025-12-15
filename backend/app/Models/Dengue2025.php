@@ -223,6 +223,7 @@ class Dengue2025 extends Model
 
     /**
      * Scope: Filtrar por faixa etária
+     * NU_IDADE_N no SINAN usa formato: 4XXX onde XXX é a idade em anos
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param int $idadeMin
@@ -231,7 +232,11 @@ class Dengue2025 extends Model
      */
     public function scopeFaixaEtaria($query, $idadeMin, $idadeMax)
     {
-        return $query->whereBetween('IDADE', [$idadeMin, $idadeMax]);
+        // Converte idade para código SINAN: 4000 + idade
+        $codigoMin = 4000 + $idadeMin;
+        $codigoMax = 4000 + $idadeMax;
+        
+        return $query->whereBetween('NU_IDADE_N', [$codigoMin, $codigoMax]);
     }
 
     /**

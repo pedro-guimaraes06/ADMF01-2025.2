@@ -36,23 +36,6 @@ Route::prefix('risco')->group(function () {
     Route::get('/{id}', [RiscoController::class, 'buscar']);
     Route::get('/', [RiscoController::class, 'listar']);
     Route::get('/stats/estatisticas', [RiscoController::class, 'estatisticas']);
-    // Debug temporário: inspeciona colunas e último registro
-    Route::get('/_debug/columns', function() {
-        try {
-            $cols = \DB::getSchemaBuilder()->getColumnListing('dengue_2025');
-            $ultimo = \DB::table('dengue_2025')->orderByDesc('id')->limit(1)->first();
-            return response()->json([
-                'success' => true,
-                'columns' => $cols,
-                'ultimo_registro' => $ultimo,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    });
 });
 
 /*
